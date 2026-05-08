@@ -3,6 +3,9 @@ import cors from "cors"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
 import fs from "fs/promises"
+import mongoose from "mongoose"
+import connectDB from "./config/db.js"
+import Application from "./models/Application.js"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const csvFile = join(__dirname, "applications.csv")
@@ -97,6 +100,11 @@ const parseCsvLine = (line) => {
 }
 
 await ensureCsvFile()
+try {
+  await connectDB()
+} catch (error) {
+  console.warn("MongoDB unavailable. Continuing with CSV fallback.")
+}
 
 const app = express()
 const normalizeOrigin = (origin = "") => origin.trim().replace(/\/$/, "")
@@ -177,15 +185,58 @@ app.post("/api/apply", async (req, res) => {
     .join(",") + "\n"
 
   try {
+    if (mongoose.connection.readyState === 1) {
+      const created = await Application.create({
+        name,
+        grade,
+        parentName,
+        email,
+        phone,
+        message: message || "",
+      })
+
+      res.json({
+        success: true,
+        application: {
+          id: created._id.toString(),
+          name: created.name,
+          grade: created.grade,
+          parentName: created.parentName,
+          email: created.email,
+          phone: created.phone,
+          message: created.message || "",
+          submittedAt: created.createdAt?.toISOString?.() || new Date().toISOString(),
+        },
+      })
+      return
+    }
+
     await appendCsvRow(row)
     res.json({ success: true, application })
   } catch (error) {
-    console.error("CSV write failed:", error)
+    console.error("Application write failed:", error)
     res.status(500).json({ error: "Unable to save application. Please try again." })
   }
 })
 
 app.get("/api/applications", async (_req, res) => {
+  if (mongoose.connection.readyState === 1) {
+    const records = await Application.find().sort({ createdAt: -1 }).lean()
+    const applications = records.map((record) => ({
+      id: record._id.toString(),
+      name: record.name,
+      grade: record.grade,
+      parentName: record.parentName,
+      email: record.email,
+      phone: record.phone,
+      message: record.message || "",
+      submittedAt: record.createdAt?.toISOString?.() || "",
+    }))
+
+    res.json(applications)
+    return
+  }
+
   const raw = await fs.readFile(csvFile, "utf8")
   const lines = raw.trim().split(/\r?\n/)
   const headers = lines[0].split(",")

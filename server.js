@@ -157,7 +157,7 @@ app.get("/api/applications", async (_req, res) => {
   res.json(applications)
 })
 
-const port = 4000
+const port = 5000
 app.listen(port, () => {
   console.log(`Admissions server running at http://localhost:${port}`)
 })

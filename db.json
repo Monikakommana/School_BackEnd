@@ -1,0 +1,24 @@
+{
+  "applications": [
+    {
+      "id": 1778214735217,
+      "name": "DB Save Test",
+      "grade": "6",
+      "parentName": "Parent DB",
+      "email": "dbsave@test.com",
+      "phone": "6666666666",
+      "message": "save to db json",
+      "submittedAt": "2026-05-08T04:32:15.213Z"
+    },
+    {
+      "id": 1778214800963,
+      "name": "kk",
+      "grade": "jk",
+      "parentName": "jkj",
+      "email": "monikakommana@gmail.com",
+      "phone": "000000000",
+      "message": "nlo",
+      "submittedAt": "2026-05-08T04:33:20.961Z"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "school-mang-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.4",
+    "mongoose": "^9.6.1"
+  }
+}

@@ -99,8 +99,13 @@ const parseCsvLine = (line) => {
 await ensureCsvFile()
 
 const app = express()
-app.use(cors({ origin: ["http://localhost:5173", "https://school-front-end-five.vercel.app/"] }))
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+app.use(cors({ origin: [frontendUrl] }))
 app.use(express.json())
+
+app.get("/", (_req, res) => {
+  res.send("Admissions server is running")
+})
 
 app.post("/api/apply", async (req, res) => {
   const { name, grade, parentName, email, phone, message } = req.body
@@ -157,7 +162,7 @@ app.get("/api/applications", async (_req, res) => {
   res.json(applications)
 })
 
-const port = 5000
+const port = process.env.PORT || 5000
 app.listen(port, () => {
-  console.log(`Admissions server running at http://localhost:${port}`)
+  console.log(`Admissions server running on port ${port}`)
 })

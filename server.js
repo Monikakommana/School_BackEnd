@@ -99,7 +99,7 @@ const parseCsvLine = (line) => {
 await ensureCsvFile()
 
 const app = express()
-app.use(cors({ origin: "http://localhost:5173" }))
+app.use(cors({ origin: ["http://localhost:5173", "https://your-frontend-url.vercel.app"] }))
 app.use(express.json())
 
 app.post("/api/apply", async (req, res) => {

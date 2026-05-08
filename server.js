@@ -99,8 +99,46 @@ const parseCsvLine = (line) => {
 await ensureCsvFile()
 
 const app = express()
-const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
-app.use(cors({ origin: [frontendUrl] }))
+const normalizeOrigin = (origin = "") => origin.trim().replace(/\/$/, "")
+const isVercelDomain = (origin = "") => {
+  try {
+    const hostname = new URL(origin).hostname
+    return hostname.endsWith(".vercel.app")
+  } catch {
+    return false
+  }
+}
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  ...(process.env.FRONTEND_URLS || "").split(","),
+  "http://localhost:5173",
+]
+  .map(normalizeOrigin)
+  .filter(Boolean)
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow same-origin/server-side requests without an Origin header.
+      if (!origin) {
+        callback(null, true)
+        return
+      }
+
+      if (allowedOrigins.includes(normalizeOrigin(origin))) {
+        callback(null, true)
+        return
+      }
+
+      if (isVercelDomain(origin)) {
+        callback(null, true)
+        return
+      }
+
+      callback(new Error(`CORS blocked for origin: ${origin}`))
+    },
+  }),
+)
 app.use(express.json())
 
 app.get("/", (_req, res) => {
